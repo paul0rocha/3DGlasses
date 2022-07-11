@@ -1,0 +1,236 @@
+select 
+    distinct ORDNUM,
+    case
+    when ordtyp = '1'  then 'PTL'
+    when ordtyp = '3' then 'STARBUCKS'
+    END ORDTYP,
+    
+    
+    UC_VAR_FLD1 as nota_fiscal,
+    UC_VAR_FLD17 as "ORDER",
+    cponum,
+    CARCOD,
+     to_char (ENTDTE, 'DD/MM/YYYY HH24:MI:SS') as "INTEGRACO_WMS",to_char (integra, 'DD/MM/YYYY HH24:MI:SS') as "INTEGRACAO_SAP",
+    to_char (pagamento, 'DD/MM/YYYY HH24:MI:SS') as "PAGAMENTO",
+    status,
+    uc_var_fld16 as "SERVICE",
+    ship_id,
+    case when adddte  is  null  then 'NOK' else 'OK'
+    end PDF,
+    car_move_id as "ROMANEIO",stoloc,  pckdte,
+    CASE
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-0, 'DD/MM/YY') THEN 'D0'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-1, 'DD/MM/YY') THEN 'D-1'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-2, 'DD/MM/YY') THEN 'D-2'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-3, 'DD/MM/YY') THEN 'D-3'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-4, 'DD/MM/YY') THEN 'D-4'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-5, 'DD/MM/YY') THEN 'D-5'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-6, 'DD/MM/YY') THEN 'D-6'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-7, 'DD/MM/YY') THEN 'D-7'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate-8, 'DD/MM/YY') THEN 'D-8'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate+1, 'DD/MM/YY') THEN 'D+1'
+    WHEN to_char(CORTE_INTEGRACAO, 'DD/MM/YY') = to_char(sysdate+2, 'DD/MM/YY') THEN 'D+2' else '<-8'
+    END "DIA",
+    
+    case 
+    when   loddte < CORTE_EXPEDICAO then 'Expedido_On time' 
+    when loddte > CORTE_EXPEDICAO then 'Expedido_backlog'
+    when    CORTE_EXPEDICAO < sysdate then 'Backlog'
+    when  CORTE_EXPEDICAO> sysdate then 'Today_On Time'
+    end "Detalhe Pedidos"
+   
+    from
+    (SELECT 
+    ENTDTE,
+    ORDNUM,
+    csr_nam,
+    adddte,
+    ordtyp,
+    ship_id,
+    UC_VAR_FLD1,
+    UC_VAR_FLD17,
+    uc_var_fld16,VALOR,
+    cponum,
+    case when CARCOD = 'SEQUOIA' and uc_var_fld11 = 'SEQUOIAGREEN' then 'SEQUOIAGREEN'
+    else CARCOD end CARCOD,
+    integra,loddte,
+    pagamento,
+    status,
+    pckdte,
+    car_move_id ,stoloc,
+    CASE WHEN TO_CHAR(DATA_INTEGRA,'D') != '7'
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11 != 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(DATA_INTEGRA,'D') != '7' 
+    AND CARCOD = 'CORREIOS' THEN(trunc(to_date(DATA_INTEGRA), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA ),'D') != '7'
+    AND CARCOD = 'L4B' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') != '7' 
+    AND CARCOD = 'SACSERVICE' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') != '7' 
+    AND CARCOD = 'FEDEX' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') = '7'
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11 != 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '1 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA ),'D') = '7' 
+    AND CARCOD = 'CORREIOS' THEN(trunc(to_date(DATA_INTEGRA), 'DD') + INTERVAL '1 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') = '7'
+    AND CARCOD = 'L4B' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '1 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') = '7' 
+    AND CARCOD = 'SACSERVICE' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '1 13:00:00' DAY TO SECOND)
+    WHEN TO_CHAR(to_date(DATA_INTEGRA),'D') = '7' 
+    AND CARCOD = 'FEDEX' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '1 13:00:00' DAY TO SECOND)
+    
+    WHEN TO_CHAR(to_date(integra),'D') = '7'
+    AND integra > (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '1 10:00:00' DAY TO SECOND)
+    
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra > (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND)
+    
+    WHEN TO_CHAR(to_date(integra),'D') = '7'
+    AND integra < (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '1 10:00:00' DAY TO SECOND)
+    
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra < (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND)
+    
+    END CORTE_INTEGRACAO,
+    CASE WHEN TO_CHAR(to_date(DATA_INTEGRA ),'D') != '7'  
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11 != 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '0 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D') != '7'  
+    AND CARCOD = 'CORREIOS' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '0 15:30:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D') != '7'  
+    AND CARCOD = 'L4B' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '0 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D') != '7'   
+    AND CARCOD = 'SACSERVICE' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '0 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D') != '7'   
+    AND CARCOD = 'FEDEX' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '0 20:40:00' DAY TO SECOND)
+    --     
+    WHEN TO_CHAR(to_date(DATA_INTEGRA ),'D') = '7'  
+    AND CARCOD = 'SEQUOIA'  and uc_var_fld11 != 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '1 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D')  = '7'  
+    AND CARCOD = 'CORREIOS' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '1 15:30:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA),'D')  = '7'   
+    AND CARCOD = 'L4B' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '1 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA ),'D')  = '7'    
+    AND  CARCOD = 'SACSERVICE' THEN(trunc(to_date(DATA_INTEGRA)	, 'DD') + INTERVAL '1 20:40:00' DAY TO SECOND)
+    WHEN  TO_CHAR(to_date(DATA_INTEGRA ),'D') = '7'     
+    AND CARCOD = 'FEDEX' THEN(trunc(to_date(DATA_INTEGRA )	, 'DD') + INTERVAL '1 20:40:00' DAY TO SECOND)
+    
+              
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra > (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+      
+              
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra > (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    
+              
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra < (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+      
+              
+    WHEN TO_CHAR(to_date(integra),'D') != '7'
+    AND integra < (trunc(to_date(integra )	, 'DD') + INTERVAL '0 10:00:00' DAY TO SECOND) 
+    AND CARCOD = 'SEQUOIA' and uc_var_fld11  = 'SEQUOIAGREEN' THEN(trunc(to_date(DATA_INTEGRA ), 'DD') + INTERVAL '0 13:00:00' DAY TO SECOND)
+    
+    END CORTE_EXPEDICAO
+    
+     FROM (SELECT 
+    o.ORDNUM,
+    o.ordtyp,
+    o.csr_nam,
+    o.uc_var_fld11,
+   REPLACE(O.UC_VAR_FLD6,'.',',') AS VALOR,
+    ol.UC_VAR_FLD17,
+    ol.UC_VAR_FLD1 ,
+    o.cponum,
+    ol.uc_var_fld16,
+    shl.ship_id,
+    pdf.adddte,
+    OL.CARCOD,iv.loddte,
+    o.ENTDTE,
+    (NVL(o.cpodte,o.ENTDTE) - interval '3' hour ) integra,
+    (NVL(to_date(o.UC_VAR_FLD15,'YYYYMMDDHH24MISS'),o.ENTDTE)- interval '3' hour ) pagamento,
+        case 
+            when trunc((NVL(o.cpodte,o.ENTDTE) - interval '3' hour ) ,'DD') = TRUNC(NVL(to_date(o.UC_VAR_FLD15,'YYYYMMDDHH24MISS'),o.ENTDTE)- interval '3' hour,'DD')
+                THEN
+                (
+                    CASE WHEN (NVL(o.cpodte ,o.ENTDTE)- interval '3' hour) < trunc((NVL(o.cpodte,o.ENTDTE) - interval '3' hour),'DD') + interval '13' hour
+                         AND NVL(to_date(o.UC_VAR_FLD15,'YYYYMMDDHH24MISS'),o.ENTDTE)- interval '3' hour  < TRUNC( (NVL(to_date(o.UC_VAR_FLD15,'YYYYMMDDHH24MISS'),o.ENTDTE)- interval '3' hour ) ,'DD')+ interval '12' hour
+                        THEN TRUNC((NVL(o.cpodte,o.ENTDTE) - interval '3' hour ),'DD')
+                    ELSE trunc((NVL(o.cpodte,o.ENTDTE) - interval '3' hour ),'DD') + 1
+                    END 
+                )
+             when (NVL(o.cpodte,o.ENTDTE) - interval '3' hour ) < trunc((NVL(o.cpodte,o.ENTDTE) - interval '3' hour),'DD') + interval '13' hour
+                 then TRUNC((NVL(o.cpodte,o.ENTDTE) - interval '3' hour ),'DD')
+             when (NVL(o.cpodte,o.ENTDTE) - interval '3' hour ) > trunc((NVL(o.cpodte ,o.ENTDTE)- interval '3' hour),'DD') + interval '13' hour
+                then trunc((NVL(o.cpodte,o.ENTDTE) - interval '3' hour ),'DD') + 1
+            when (NVL(o.cpodte,o.ENTDTE) - interval '3' hour ) > trunc((NVL(o.cpodte ,o.ENTDTE)- interval '3' hour),'DD') + interval '13' hour
+                then  trunc((NVL(o.cpodte ,o.ENTDTE)- interval '3' hour ),'DD') + 1
+        end  DATA_INTEGRA,
+    
+            case
+            when iv.DISPATCH_DTE is not null then 'Despachado'
+            when iv.loddte is not null and iv.DISPATCH_DTE is null  then 'Carregado'
+            when status.status = 'Separado'  and iv.loddte is  null then 'Separado'
+            when status.status = 'In-Process' and status.ordnum is not null then  'In-Process' 
+            when shl.ship_id is not null  and status.ordnum is  null then 'Integrado'
+            else 'Integrado' end status,iv.car_move_id ,inventory_view.stoloc,iv.dispatch_dte,status.pckdte
+             
+        
+    FROM ord o
+    INNER JOIN ord_line ol
+                ON ol.ordnum = o.ordnum
+                and o.client_id = ol.client_id
+                and o.wh_id = ol.wh_id
+                AND O.CLIENT_ID = 'CID01'
+                    AND O.ORDTYP  IN  ('1','3')
+                AND o.entdte >= trunc(SYSDATE) - 30
+                AND ol.CANCELLED_FLG != '1' 
+                and ol.carcod != 'GEN' and o.uc_VAR_FLD15 != '00000000000000'
+    inner join ADRMST ad
+                ON ad.ADR_ID = o.BT_ADR_ID left join dhl_ordem_pdf pdf on pdf.ordnum = ol.ordnum 
+    LEFT JOIN shipment_line shl
+                ON shl.ordnum = ol.ordnum 
+                and shl.ordlin = ol.ordlin
+                and shl.client_id = ol.client_id
+                and shl.wh_id = ol.wh_id
+                and shl.linsts != 'B' 
+    LEFT JOIN SHIP_STRUCT_VIEW iv
+                ON shl.ship_id = iv.ship_id
+                AND IV.SHPSTS != 'B' 
+    left join inventory_view 
+                on shl.ship_line_id = inventory_view.ship_line_id
+              
+    left join   
+            (
+            SELECT 
+            distinct SHIPPING_PCKWRK_VIEW.ordnum,
+            shipment_line.client_id,
+            shipment_line.wh_id,
+            max(SHIPPING_PCKWRK_VIEW.pckdte) as pckdte, 
+            CASE
+            WHEN sum(SHIPPING_PCKWRK_VIEW.pckqty) = sum(SHIPPING_PCKWRK_VIEW.appqty) THEN
+            'Separado'
+            ELSE 'In-Process'
+            END AS Status
+            FROM SHIPPING_PCKWRK_VIEW 
+            inner join shipment_line 
+                                    on SHIPPING_PCKWRK_VIEW.ship_line_id = shipment_line.ship_line_id
+                                    and SHIPPING_PCKWRK_VIEW.ship_id = shipment_line.ship_id
+                                    and SHIPPING_PCKWRK_VIEW.ordlin = shipment_line.ordlin
+                                    and SHIPPING_PCKWRK_VIEW.ordnum = shipment_line.ordnum
+            group by 
+            SHIPPING_PCKWRK_VIEW.ordnum,
+            shipment_line.client_id,
+            shipment_line.wh_id 
+            )status  on status.ordnum = o.ordnum 
+                     and  status.client_id = o.client_id
+                     and  status.wh_id = o.wh_id  
+            )where 
+            loddte is null ) ORDER BY INTEGRACO_WMS ASC
