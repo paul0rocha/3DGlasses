@@ -1,5 +1,7 @@
 ## 3D Glasses 
 
+![oculos](https://user-images.githubusercontent.com/63813811/194685303-20c252e9-6796-4830-a748-d74e817e7d8c.png)
+
 
 ## About this Project
 
@@ -20,12 +22,6 @@ _"The project consists of building a 3D glasses to view an environment developed
 
 - Query bulk data through the PyCep api and thereby return customer address data  
 
-## Use
-
-- Upload the file excel to google colab
- 
- 
-![oculos](https://user-images.githubusercontent.com/63813811/194685303-20c252e9-6796-4830-a748-d74e817e7d8c.png)
 
 
 ![c#](https://user-images.githubusercontent.com/63813811/194780099-47199cbd-01b5-491d-83eb-38fb6a968d26.png)
