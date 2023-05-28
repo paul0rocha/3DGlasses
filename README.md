@@ -18,25 +18,11 @@ _"The project consists of building a 3D glasses to view an environment developed
 
 1 - We use the google colab platform to use the application
 
-## Functionalities
-
-- Query bulk data through the PyCep api and thereby return customer address data  
-
+## View Aplication Unity
 
 
 ![c#](https://user-images.githubusercontent.com/63813811/194780099-47199cbd-01b5-491d-83eb-38fb6a968d26.png)
    
-
-
-**Installing dependencies**
-
-
-```
-pip install pycep-correios==4.0.3
-```
- ![Img](https://github.com/steniowagner/mindCast/assets/63813811/46842741-3b16-4ed8-bb08-30cbd75e59d9)
-
-
 
 
 ## Contributing
