@@ -14,9 +14,6 @@ _"The project consists of building a 3D glasses to view an environment developed
 🤩:**
 
 
-## Some notes about this app
-
-1 - We use the google colab platform to use the application
 
 ## View Aplication Unity
 
